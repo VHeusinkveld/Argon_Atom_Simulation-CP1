@@ -1,3 +1,5 @@
+Our program can be found in 'main.pynb' 
+
 * What you are trying to achieve right now
 We have to perfect te renomalization of the speed (for achieving the correct T). 
 Appart from that we are implementing computatoin of system property's (pair correlation functin, pressure, C_v)
