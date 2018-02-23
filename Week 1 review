@@ -3,8 +3,16 @@ We have to perfect te renomalization of the speed (for achieving the correct T).
 Appart from that we are implementing computatoin of system property's (pair correlation functin, pressure, C_v)
 
 * What checks do you perform to see if what you are doing is correct.
-We check the E_kin and E_pot, 
+We check if the total Energy is conserved in the system. (by evualuation E_pot, E_kin)
+We check if the temperature of the system, agrees to the one we 'set'. (after renormalizing speed)
+We check if the phases mentioned in Jos' book agree with the animations. (solid, gas, liquid)
+    > In solid for example the atoms should stay in a FCC structure (and they do)
 
 * What do these checks show. If you use a plot to verify correctness, attach this plot
+We will add this later. (so far they all seem to be correct)
+
 * If the checks pass, write what is next in your plan
+See answer at 1 
+
 * If the checks fail, discuss what you can try next to fix the problem.
+-
