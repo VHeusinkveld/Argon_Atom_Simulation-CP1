@@ -1,0 +1,20 @@
+Our program can be found in 'main.pynb' 
+
+* What you are trying to achieve right now
+We have to perfect te renormalisation of the particle speeds (for achieving the correct T(emperature)). 
+Apart from that, we are implementing computation of the system property's (pair correlation functin, pressure, C_v)
+
+* What checks do you perform to see if what you are doing is correct.
+We check if the total energy in the system is conserved. (by evaluation of SUM(E_pot, E_kin))
+We check if the temperature of the system agrees to the one we 'set'. (after renormalising the particle speeds)
+We check if the phases mentioned in Jos' book agree with the animations. (solid, gas, liquid)
+    > In solid state, for example, the atoms should stay in a FCC structure (and they do in our program)
+
+* What do these checks show. If you use a plot to verify correctness, attach this plot
+We will add this later. (so far they all seem to be correct)
+
+* If the checks pass, write what is next in your plan
+See answer at 1 
+
+* If the checks fail, discuss what you can try next to fix the problem.
+-
