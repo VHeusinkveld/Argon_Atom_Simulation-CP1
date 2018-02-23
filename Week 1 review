@@ -1,0 +1,10 @@
+* What you are trying to achieve right now
+We have to perfect te renomalization of the speed (for achieving the correct T). 
+Appart from that we are implementing computatoin of system property's (pair correlation functin, pressure, C_v)
+
+* What checks do you perform to see if what you are doing is correct.
+We check the E_kin and E_pot, 
+
+* What do these checks show. If you use a plot to verify correctness, attach this plot
+* If the checks pass, write what is next in your plan
+* If the checks fail, discuss what you can try next to fix the problem.
