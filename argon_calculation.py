@@ -4,6 +4,10 @@ import matplotlib.pyplot as plt
 import os
 import csv
 
+# -----------------------------------------------------------------------------------------------------------------------
+# Full argon calculation
+# -----------------------------------------------------------------------------------------------------------------------
+
 def argon_simu(t_max, delta_t, L, N, dim, lattice, algorithm, conf_level, 
                inter_numb, renorm_count_max, equi_data, bin_resolution,
                bin_number, bin_delta, unit_cells, unit_power, unit_size, T):
@@ -60,12 +64,17 @@ def argon_simu(t_max, delta_t, L, N, dim, lattice, algorithm, conf_level,
     
     return E_kin, E_pot, T_tot, pos, Sum_rF, differ_bins, last_data_iteration, last_renorm_time, bins, bin_edges, t_range
 
+# -----------------------------------------------------------------------------------------------------------------------
+# Initialization functions 
+# -----------------------------------------------------------------------------------------------------------------------
+
 def init_cells(unit_power, N_unit, density):
     unit_cells = unit_power**3         # nubmer of cells in total
     unit_size = (N_unit/density)**(1/3)
     L = unit_size*(unit_power)         # box size
     N = N_unit*unit_cells              # number of particles 
     return unit_cells, unit_size, L, N
+
 
 def initialize_arrays(t_range, N, dim, bin_number):
     '''Function containing all the initialization of the necesarry arrays. Names should speak for themself.'''
@@ -78,41 +87,6 @@ def initialize_arrays(t_range, N, dim, bin_number):
     N_inter = np.zeros((len(t_range),1),dtype=float)
     Sum_rF = np.zeros((len(t_range),1),dtype=float)    
     return pos, differ_bins, E_pot, E_kin, T_tot, N_inter, Sum_rF 
-
-class atom_props():
-    """Redunant class, can be deleted 
-    Sets atom properties
-    
-    Parameters: 
-    -----------
-    sigma: float
-        sigma of the atom, self.sig
-    epsilon: float
-        epsilon of atom, self.eps
-    mass: floast
-        mass of the atom, self.m
-    
-    """
-    def __init__(self, sigma, epsilon, mass):
-        self.sig = sigma
-        self.eps = epsilon
-        self.m = mass
-
-def pot_LJ(atom,r):
-    """Regular Lenard Jones potential, based on atom properties and distance"""
-    sig = atom.sig
-    eps = atom.eps
-    return 4*eps*((sig/r)**12 - (sig/r)**6)   
-
-def pot_LJ_dl(r):
-    """Dimensionless Lenard Jones potential, based on distances"""
-    r = r**-6 # Possibly improves speed
-    u = 4*(r**2 - r)        
-    return u
-
-def grad_pot_LJ_dl(r):
-    """Diff of the Lennard Jones potential wrt r, dimensionless"""
-    return (-48*r**-6 + 24)*r**-7 
 
 def particle_generator(lattice, L, N, dim, unit_cells, unit_power, unit_size, T):
     """Generates initial particle position and velocity.
@@ -160,13 +134,58 @@ def particle_generator(lattice, L, N, dim, unit_cells, unit_power, unit_size, T)
             print('The dimension is not equal to 3 or the number of particles doesnt equal four.')
             import sys
             sys.exit()
-            
-    # v_init = np.zeros((dim,N),dtype=float)
     # Initial velocity chosen gaussian
     v_init = np.random.normal(0, np.sqrt(T), (dim,N))
     v_init = v_init - v_init.sum(axis = 1).reshape(3,1)/N #remove net velocity from the system
     return x_init, v_init
 
+# -----------------------------------------------------------------------------------------------------------------------
+# Potential and force functions 
+# -----------------------------------------------------------------------------------------------------------------------
+
+def pot_LJ(atom,r):
+    """Regular Lenard Jones potential, based on atom properties and distance"""
+    sig = atom.sig
+    eps = atom.eps
+    return 4*eps*((sig/r)**12 - (sig/r)**6)   
+
+def pot_LJ_dl(r):
+    """Dimensionless Lenard Jones potential, based on distances"""
+    r = r**-6 # Possibly improves speed
+    u = 4*(r**2 - r)        
+    return u
+
+def grad_pot_LJ_dl(r):
+    """Diff of the Lennard Jones potential wrt r, dimensionless"""
+    return (-48*r**-6 + 24)*r**-7 
+
+def pot_and_force(delta_tot, r, dim, N):
+    """Calculate forces between particles based on potential
+    
+    Parameters:
+    -----------
+    delta_tot: array of size (dim, N, N)
+        Differenes between particles
+    r: array of size (N, N)
+        inter particle distances
+    dim: int
+        Number of dimensions  
+    N: int
+        Number of particles
+    """
+    # Potentials and Forces
+    F = np.zeros((dim,N,N),dtype=float)
+    U = sum(pot_LJ_dl(r).sum(axis=1))
+    Force_grad = -grad_pot_LJ_dl(r)
+    for i in range(dim):
+        F[i] = Force_grad*delta_tot[i]/r
+    
+    F_sum = F.sum(axis=1)
+    return F_sum, U
+
+# -----------------------------------------------------------------------------------------------------------------------
+# Particle velocity and position functions  
+# -----------------------------------------------------------------------------------------------------------------------
 
 def particle_dist(L, N, x, dim):
     """"Calculate distances between NN particle pairs
@@ -199,30 +218,6 @@ def particle_dist(L, N, x, dim):
     r = np.sqrt(r) 
     r[r == 0] = np.inf
     return delta_tot, r
-
-def pot_and_force(delta_tot, r, dim, N):
-    """Calculate forces between particles based on potential
-    
-    Parameters:
-    -----------
-    delta_tot: array of size (dim, N, N)
-        Differenes between particles
-    r: array of size (N, N)
-        inter particle distances
-    dim: int
-        Number of dimensions  
-    N: int
-        Number of particles
-    """
-    # Potentials and Forces
-    F = np.zeros((dim,N,N),dtype=float)
-    U = sum(pot_LJ_dl(r).sum(axis=1))
-    Force_grad = -grad_pot_LJ_dl(r)
-    for i in range(dim):
-        F[i] = Force_grad*delta_tot[i]/r
-    
-    F_sum = F.sum(axis=1)
-    return F_sum, U
 
 def xv_iteration(algorithm, x, v, F_tot_old, L, N, dim, delta_t):
     """Euler or verlet arlgorithm for position and velocity
@@ -258,6 +253,10 @@ def xv_iteration(algorithm, x, v, F_tot_old, L, N, dim, delta_t):
         v = v + 0.5*delta_t * (F_tot + F_tot_old)
             
     return x, v, F_tot, U.sum(), r
+
+# -----------------------------------------------------------------------------------------------------------------------
+# Energy functions
+# -----------------------------------------------------------------------------------------------------------------------
 
 def temp_check(E_kin, E_pot, v, T_tot, i, conf_level, check_time, sum_past, last_renorm_time, T, N):
     '''Determines if the temperature of the system agress 
@@ -304,7 +303,10 @@ def pot_calc(U, v):
     E_kin = 0.5*(v**2).sum(axis=1).sum(axis=0)
     return E_kin, E_pot
 
-# Create random bootstrap sequence 
+# -----------------------------------------------------------------------------------------------------------------------
+# Quanity calculation functions 
+# -----------------------------------------------------------------------------------------------------------------------
+
 def btstrp_rnd_gen(trials, last_data_iteration, last_renorm_time):
     N = last_data_iteration-last_renorm_time
     a = np.round(np.random.random(trials*N).reshape(trials,N)*N+last_renorm_time)
@@ -369,6 +371,10 @@ def pair_correlation(pair_cor_trials, last_data_iteration, last_renorm_time,
     pair_cor_x = bin_edges[1:]-bin_delta/2
     
     return pair_cor_x, pair_cor_y
+
+# -----------------------------------------------------------------------------------------------------------------------
+# Data processing functions 
+# -----------------------------------------------------------------------------------------------------------------------
 
 def write_data(data_directory, data_name_identifyer, data_header):
     data_filename = data_directory + '_' + data_name_identifyer + '.csv'
