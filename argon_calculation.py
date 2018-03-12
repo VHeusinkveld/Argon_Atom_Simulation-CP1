@@ -1,12 +1,9 @@
-import time as tm
 import numpy as np
 import copy as cp
 
 def argon_simu(t_max, delta_t, L, N, dim, lattice, algorithm, conf_level, 
                inter_numb, renorm_count_max, equi_data, bin_resolution,
                bin_number, bin_delta, unit_cells, unit_power, unit_size, T):
-    
-    start_time = tm.time()
     
     t_range = np.arange(0, t_max, delta_t) # time steps 
     x_init, v_init = particle_generator(lattice,L, N, dim, unit_cells, unit_power, unit_size, T)
@@ -57,11 +54,6 @@ def argon_simu(t_max, delta_t, L, N, dim, lattice, algorithm, conf_level,
             break
 
     last_data_iteration = cp.deepcopy(i)    
-
-    end_time = tm.time()
-    
-    print('N =',N,',','# Time steps = ',last_data_iteration)
-    print('Simulation time:', np.round(end_time - start_time,2), 's')
     
     return E_kin, E_pot, T_tot, pos, Sum_rF, differ_bins, last_data_iteration, last_renorm_time, bins, bin_edges, t_range
 
