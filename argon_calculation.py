@@ -1,5 +1,8 @@
 import numpy as np
 import copy as cp
+import matplotlib.pyplot as plt
+import os
+import csv
 
 def argon_simu(t_max, delta_t, L, N, dim, lattice, algorithm, conf_level, 
                inter_numb, renorm_count_max, equi_data, bin_resolution,
@@ -57,7 +60,12 @@ def argon_simu(t_max, delta_t, L, N, dim, lattice, algorithm, conf_level,
     
     return E_kin, E_pot, T_tot, pos, Sum_rF, differ_bins, last_data_iteration, last_renorm_time, bins, bin_edges, t_range
 
-"""Lennard-Jones for specific atom"""
+def init_cells(unit_power, N_unit, density):
+    unit_cells = unit_power**3         # nubmer of cells in total
+    unit_size = (N_unit/density)**(1/3)
+    L = unit_size*(unit_power)         # box size
+    N = N_unit*unit_cells              # number of particles 
+    return unit_cells, unit_size, L, N
 
 def initialize_arrays(t_range, N, dim, bin_number):
     '''Function containing all the initialization of the necesarry arrays. Names should speak for themself.'''
@@ -361,3 +369,56 @@ def pair_correlation(pair_cor_trials, last_data_iteration, last_renorm_time,
     pair_cor_x = bin_edges[1:]-bin_delta/2
     
     return pair_cor_x, pair_cor_y
+
+def write_data(data_directory, data_name_identifyer, data_header):
+    data_filename = data_directory + '_' + data_name_identifyer + '.csv'
+    with open(data_filename, 'w') as csvfile:
+        simu_data = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        simu_data.writerow(data_header)
+        
+def append_data(data_directory, data_name_identifyer, data_row):
+    import csv
+    data_filename = data_directory + '_' + data_name_identifyer + '.csv'
+    with open(data_filename, 'a') as csvfile:
+        simu_data = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        simu_data.writerow(data_row)
+        
+def write_figure(figure_directory, N, T, density):
+    figure_directory_N = figure_directory+ 'N' + str(N) +'/'
+    if not os.path.exists(figure_directory_N):
+        '''If the figure directory does not exists it gets created'''
+        os.makedirs(figure_directory_N)
+    figure_name_identifyer = 'N' + str(N) + 'T' + str(T) + '_' + 'rho' + str(density)
+    figure_filename = figure_directory_N + '_' + figure_name_identifyer
+    return figure_filename
+
+def plot_pair_cor(pair_cor_x, pair_cor_y, L, figure_filename):
+    plt.plot(pair_cor_x,pair_cor_y)
+    plt.xlim([0,L/2])
+    plt.ylabel('g(r)')
+    plt.xlabel('r') 
+    plt.savefig(figure_filename + '_pair_correlation.png')
+    plt.close()
+
+def plot_energy(t_range, N, E_pot, E_kin, last_data_iteration, delta_t, figure_filename):
+    # Plotting of Energy
+    plt.plot(t_range,E_pot/N,'-')
+    plt.plot(t_range,E_kin/N,'--')
+    plt.plot(t_range,(E_kin+E_pot)/N,':')
+    plt.legend(['Potential energy','Kinetic energy','Total energy'])
+    plt.xlabel('t')
+    plt.ylabel('E')
+    plt.xlim([0,(last_data_iteration-1)*delta_t])
+    plt.savefig(figure_filename + '_energy.png')
+    plt.close()
+        
+def plot_temperature(t_range, T_tot, T, last_data_iteration, delta_t, figure_filename):
+    # Plotting of Temperature
+    plt.plot(t_range,T_tot,'-')
+    plt.plot(t_range,np.ones((len(t_range),1),dtype=float)*T,'--')
+    plt.legend(['System T','Set T'])
+    plt.xlabel('t')
+    plt.ylabel('T')
+    plt.xlim([0,(last_data_iteration-1)*delta_t])
+    plt.savefig(figure_filename + '_temperature.png')
+    plt.close()   
