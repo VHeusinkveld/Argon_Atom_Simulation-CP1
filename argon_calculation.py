@@ -378,6 +378,7 @@ def pair_correlation(pair_cor_trials, last_data_iteration, last_renorm_time,
 # -----------------------------------------------------------------------------------------------------------------------
 plt.rc('text', usetex=True)
 plt.rc('font', size = 16)
+plt.rc('font',**{'family':'serif'})
 
 def write_data(data_directory, data_name_identifyer, data_header):
     data_filename = data_directory + data_name_identifyer + '.csv'
