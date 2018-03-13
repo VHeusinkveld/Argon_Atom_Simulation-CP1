@@ -377,9 +377,10 @@ def pair_correlation(pair_cor_trials, last_data_iteration, last_renorm_time,
 # Data processing functions 
 # -----------------------------------------------------------------------------------------------------------------------
 plt.rc('text', usetex=True)
+plt.rc('font', size = 16)
 
 def write_data(data_directory, data_name_identifyer, data_header):
-    data_filename = data_directory + '_' + data_name_identifyer + '.csv'
+    data_filename = data_directory + data_name_identifyer + '.csv'
     with open(data_filename, 'w') as csvfile:
         simu_data = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         simu_data.writerow(data_header)
@@ -404,8 +405,9 @@ def plot_pair_cor(pair_cor_x, pair_cor_y, L, figure_filename):
     plt.plot(pair_cor_x,pair_cor_y)
     plt.xlim([0,L/2])
     plt.ylim(ymin=0)
-    plt.ylabel('$\mathrm{g(r)}$', fontsize=18)
-    plt.xlabel('$\mathrm{r}$', fontsize=18) 
+    plt.ylabel('$\mathrm{g(r)}$',fontsize=18)
+    plt.xlabel('$\mathrm{r}$',fontsize=18) 
+    plt.tight_layout()
     plt.savefig(figure_filename + '_pair_correlation.png')
     plt.close()
 
@@ -414,10 +416,11 @@ def plot_energy(t_range, N, E_pot, E_kin, last_data_iteration, delta_t, figure_f
     plt.plot(t_range,E_pot/N,'-')
     plt.plot(t_range,E_kin/N,'--')
     plt.plot(t_range,(E_kin+E_pot)/N,':')
-    plt.legend(['Potential energy','Kinetic energy','Total energy'])
-    plt.xlabel('$\mathrm{t}$', fontsize=18)
-    plt.ylabel('$\mathrm{E}$', fontsize=18)
+    plt.legend(['Potential energy','Kinetic energy','Total energy'],fontsize=18)
+    plt.xlabel('$\mathrm{t}$',fontsize=18)
+    plt.ylabel('$\mathrm{E}$',fontsize=18)
     plt.xlim([0,(last_data_iteration-1)*delta_t])
+    plt.tight_layout()
     plt.savefig(figure_filename + '_energy.png')
     plt.close()
         
@@ -425,10 +428,11 @@ def plot_temperature(t_range, T_tot, T, last_data_iteration, delta_t, figure_fil
     # Plotting of Temperature
     plt.plot(t_range,T_tot,'-')
     plt.plot(t_range,np.ones((len(t_range),1),dtype=float)*T,'--')
-    plt.legend(['System T','Set T'])
-    plt.xlabel('$\mathrm{t}', fontsize=18)
-    plt.ylabel('$\mathrm{T}', fontsize=18)
+    plt.legend(['System T','Set T'],fontsize=18)
+    plt.xlabel('$\mathrm{t}$',fontsize=18)
+    plt.ylabel('$\mathrm{T}$',fontsize=18)
     plt.xlim([0,(last_data_iteration-1)*delta_t])
     plt.ylim(ymin=0)
+    plt.tight_layout()
     plt.savefig(figure_filename + '_temperature.png')
     plt.close()   
