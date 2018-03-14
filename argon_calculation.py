@@ -388,7 +388,7 @@ def write_data(data_directory, data_name_identifyer, data_header):
         
 def append_data(data_directory, data_name_identifyer, data_row):
     import csv
-    data_filename = data_directory + '_' + data_name_identifyer + '.csv'
+    data_filename = data_directory + data_name_identifyer + '.csv'
     with open(data_filename, 'a') as csvfile:
         simu_data = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         simu_data.writerow(data_row)
