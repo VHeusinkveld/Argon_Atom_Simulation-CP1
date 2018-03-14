@@ -414,10 +414,10 @@ def plot_pair_cor(pair_cor_x, pair_cor_y, L, figure_filename):
 
 def plot_energy(t_range, N, E_pot, E_kin, last_data_iteration, delta_t, figure_filename):
     # Plotting of Energy
-    plt.plot(t_range,E_pot/N,'-')
-    plt.plot(t_range,E_kin/N,'--')
-    plt.plot(t_range,(E_kin+E_pot)/N,':')
-    plt.legend(['Potential energy','Kinetic energy','Total energy'],fontsize=18)
+    plt.plot(t_range,E_pot/N,'-', label="Potential energy")
+    plt.plot(t_range,E_kin/N,'--', label="Kinetic energy")
+    plt.plot(t_range,(E_kin+E_pot)/N,':', label="Total energy")
+    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.,fontsize=18)
     plt.xlabel('$\mathrm{t}$',fontsize=18)
     plt.ylabel('$\mathrm{E}$',fontsize=18)
     plt.xlim([0,5])#(last_data_iteration-1)*delta_t])
