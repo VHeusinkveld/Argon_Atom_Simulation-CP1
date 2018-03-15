@@ -12,6 +12,11 @@ def argon_simu(t_max, delta_t, L, N, dim, lattice, algorithm, conf_level,
                inter_numb, renorm_count_max, equi_data, bin_resolution,
                bin_number, bin_delta, unit_cells, unit_power, unit_size, T):
     
+    '''Main part of the argon simulation program, it takes all the initialization settings 
+    and performs the required calculations based on that. Relevent values are returned out 
+    of which the Energy's, Pressure, C_v, Temperature and pair correlation calculations/plots
+    can be made. The meaning of all input variables is described in the main_file.'''
+    
     t_range = np.arange(0, t_max, delta_t) # time steps 
     x_init, v_init = particle_generator(lattice,L, N, dim, unit_cells, unit_power, unit_size, T)
     x = cp.deepcopy(x_init) # initial particle positions
@@ -36,10 +41,10 @@ def argon_simu(t_max, delta_t, L, N, dim, lattice, algorithm, conf_level,
         t_mfp = l_mfp/(np.sqrt(2*E_kin[i]/N))
         N_inter_tot += delta_t/t_mfp # Number of interactions based on delta_t and mean free path.
 
-        '''The following if statement check if enough interactions have 
-        happened to be in equilibrium, also if it arrived here 10 times 
-        but did not need to renormalize then it is assumed that final 
-        equilibrium is achieved.'''
+        #The following if statement check if enough interactions have 
+        #happened to be in equilibrium, also if it arrived here 10 times 
+        #but did not need to renormalize then it is assumed that final 
+        #equilibrium is achieved.
 
         if N_inter_tot > inter_numb*N and renorm_count < renorm_count_max:
             v, last_renorm_time, renorm_check = temp_check(E_kin, E_pot, v, T_tot, i, conf_level, t, sum_past, last_renorm_time, T, N)
@@ -57,7 +62,7 @@ def argon_simu(t_max, delta_t, L, N, dim, lattice, algorithm, conf_level,
         differ_bins[i,:], bin_edges = np.histogram(r[r!=np.inf], bins) # used for pair correlation
 
         if renorm_count >= renorm_count_max and i - last_renorm_time > equi_data:
-            '''Breaks if enough equilibrium data is aquired.'''
+            # Breaks if enough equilibrium data is aquired.
             break
 
     last_data_iteration = cp.deepcopy(i)    
@@ -69,6 +74,12 @@ def argon_simu(t_max, delta_t, L, N, dim, lattice, algorithm, conf_level,
 # -----------------------------------------------------------------------------------------------------------------------
 
 def init_cells(unit_power, N_unit, density):
+    '''Initialization function concerning the geometry of the problem. 
+    It takes unit_power, N_unit and density described in main_file 
+    to return unit_cells, containing fcc coordinates, unit_size, containing
+    the size of the unit cell, L, the total size of the geometry and N,
+    the number of particles. '''
+    
     unit_cells = unit_power**3         # nubmer of cells in total
     unit_size = (N_unit/density)**(1/3)
     L = unit_size*(unit_power)         # box size
@@ -114,12 +125,12 @@ def particle_generator(lattice, L, N, dim, unit_cells, unit_power, unit_size, T)
                                           [0,unit_size/2,0,unit_size/2],
                                           [0,unit_size/2,unit_size/2,0]])
             
-            # Create list width 1d coordinate of every starting cell
+            # Create list width 1d coordinate of every corner of a cell
             a =[]
             for p in range(unit_power):
                 a.append([unit_size*p])
             
-            # Create a 1d grid of all unit cell corners
+            # Create a 3d grid of all unit cell corners
             arr = np.array([arr.flatten() for arr in np.meshgrid(a,a,a)])
             
             # Create array with all the translated unit cell coordinates
@@ -136,7 +147,7 @@ def particle_generator(lattice, L, N, dim, unit_cells, unit_power, unit_size, T)
             sys.exit()
     # Initial velocity chosen gaussian
     v_init = np.random.normal(0, np.sqrt(T), (dim,N))
-    v_init = v_init - v_init.sum(axis = 1).reshape(3,1)/N #remove net velocity from the system
+    v_init = v_init - v_init.sum(axis = 1).reshape(3,1)/N # remove net velocity from the system
     return x_init, v_init
 
 # -----------------------------------------------------------------------------------------------------------------------
@@ -144,7 +155,7 @@ def particle_generator(lattice, L, N, dim, unit_cells, unit_power, unit_size, T)
 # -----------------------------------------------------------------------------------------------------------------------
 
 def pot_LJ(atom,r):
-    """Regular Lenard Jones potential, based on atom properties and distance"""
+    """Regular Lenard Jones potential, based on atom properties and distance, redundant now dl units are used."""
     sig = atom.sig
     eps = atom.eps
     return 4*eps*((sig/r)**12 - (sig/r)**6)   
@@ -257,7 +268,6 @@ def xv_iteration(algorithm, x, v, F_tot_old, L, N, dim, delta_t):
 # -----------------------------------------------------------------------------------------------------------------------
 # Energy functions
 # -----------------------------------------------------------------------------------------------------------------------
-plt.rc('text', usetex=True)
 
 def temp_check(E_kin, E_pot, v, T_tot, i, conf_level, check_time, sum_past, last_renorm_time, T, N):
     '''Determines if the temperature of the system agress 
@@ -309,6 +319,7 @@ def pot_calc(U, v):
 # -----------------------------------------------------------------------------------------------------------------------
 
 def btstrp_rnd_gen(trials, last_data_iteration, last_renorm_time):
+    '''Generates sequence of random data points that can be used in the bootstrap algorithm.'''
     N = last_data_iteration-last_renorm_time
     a = np.round(np.random.random(trials*N).reshape(trials,N)*N+last_renorm_time)
     return a.astype(int)    
@@ -376,24 +387,23 @@ def pair_correlation(pair_cor_trials, last_data_iteration, last_renorm_time,
 # -----------------------------------------------------------------------------------------------------------------------
 # Data processing functions 
 # -----------------------------------------------------------------------------------------------------------------------
-plt.rc('text', usetex=True)
-plt.rc('font', size = 16)
-plt.rc('font',**{'family':'serif'})
 
 def write_data(data_directory, data_name_identifyer, data_header):
+    '''Writes data to a csv file'''
     data_filename = data_directory + data_name_identifyer + '.csv'
     with open(data_filename, 'w') as csvfile:
         simu_data = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         simu_data.writerow(data_header)
         
 def append_data(data_directory, data_name_identifyer, data_row):
-    import csv
+    '''Appends data to a csv file'''
     data_filename = data_directory + data_name_identifyer + '.csv'
     with open(data_filename, 'a') as csvfile:
         simu_data = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         simu_data.writerow(data_row)
         
 def write_figure(figure_directory, N, T, density):
+    '''Returns the filename necessary to write away a figure to a specified directory.'''
     figure_directory_N = figure_directory+ 'N' + str(N) +'/'
     if not os.path.exists(figure_directory_N):
         '''If the figure directory does not exists it gets created'''
@@ -403,9 +413,13 @@ def write_figure(figure_directory, N, T, density):
     return figure_filename
 
 def plot_pair_cor(pair_cor_x, pair_cor_y, L, figure_filename):
+    '''Plot of the pair correlation function.'''
     plt.plot(pair_cor_x,pair_cor_y)
     plt.xlim([0,L/2])
     plt.ylim(ymin=0)
+    plt.rc('text', usetex=True)
+    plt.rc('font', size = 16)
+    plt.rc('font',**{'family':'serif'})
     plt.ylabel('$\mathrm{g(r)}$',fontsize=18)
     plt.xlabel('$\mathrm{r}$',fontsize=18) 
     plt.tight_layout()
@@ -413,26 +427,32 @@ def plot_pair_cor(pair_cor_x, pair_cor_y, L, figure_filename):
     plt.close()
 
 def plot_energy(t_range, N, E_pot, E_kin, last_data_iteration, delta_t, figure_filename):
-    # Plotting of Energy
+    '''Plot of the energies.'''
     plt.plot(t_range,E_pot/N,'-', label="Potential energy")
     plt.plot(t_range,E_kin/N,'--', label="Kinetic energy")
     plt.plot(t_range,(E_kin+E_pot)/N,':', label="Total energy")
+    plt.rc('text', usetex=True)
+    plt.rc('font', size = 16)
+    plt.rc('font',**{'family':'serif'})
     plt.legend(bbox_to_anchor=(0.98, 0.88), loc=1, borderaxespad=0.,fontsize=18)
     plt.xlabel('$\mathrm{t}$',fontsize=18)
     plt.ylabel('$\mathrm{E}$',fontsize=18)
-    plt.xlim([0,5])#(last_data_iteration-1)*delta_t])
+    plt.xlim([0,5]) # Upuntil time 5, the points of interest happen
     plt.tight_layout()
     plt.savefig(figure_filename + '_energy.png')
     plt.close()
         
 def plot_temperature(t_range, T_tot, T, last_data_iteration, delta_t, figure_filename):
-    # Plotting of Temperature
+    '''Plot of the temperature.'''
     plt.plot(t_range,T_tot,'-')
     plt.plot(t_range,np.ones((len(t_range),1),dtype=float)*T,'--')
     plt.legend(['System T','Set T'],fontsize=18)
+    plt.rc('text', usetex=True)
+    plt.rc('font', size = 16)
+    plt.rc('font',**{'family':'serif'})
     plt.xlabel('$\mathrm{t}$',fontsize=18)
     plt.ylabel('$\mathrm{T}$',fontsize=18)
-    plt.xlim([0,5])#(last_data_iteration-1)*delta_t])
+    plt.xlim([0,5])
     plt.ylim(ymin=0)
     plt.tight_layout()
     plt.savefig(figure_filename + '_temperature.png')
