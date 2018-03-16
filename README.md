@@ -10,4 +10,4 @@ exported_data contains csv exports of simulations
 
 exported_figs contains exported pngs from our simulations
 
-expected_values.xlsx contain the results compared to expected data.
+expected_data_full.xlsx contain the results compared to expected data.
