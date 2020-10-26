@@ -2,7 +2,7 @@
 
 [![Simulation image](https://img.youtube.com/vi/C9UwqRBVk68/0.jpg)](https://www.youtube.com/watch?v=C9UwqRBVk68)
 
-[Report](./Report/CompPhys_Report_1 FINAL.pdf)
+(Report])[./Report/CompPhys_Report_1 FINAL.pdf]
 
 ## File structure
 mainfile.ipynb contains the main program that should be run.
