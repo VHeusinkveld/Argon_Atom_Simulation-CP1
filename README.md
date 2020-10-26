@@ -1,4 +1,4 @@
-# Python simulation of the Argon Atom
+# Argon Atom Simulation Using the Verlet Algorithm
 
 [![Simulation image](https://img.youtube.com/vi/C9UwqRBVk68/0.jpg)](https://www.youtube.com/watch?v=C9UwqRBVk68)
 
