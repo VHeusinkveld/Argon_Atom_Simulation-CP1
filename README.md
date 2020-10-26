@@ -1,3 +1,8 @@
+# Python simulation of the Argon Atom
+
+[![Simulation image](https://img.youtube.com/vi/C9UwqRBVk68/0.jpg)](https://www.youtube.com/watch?v=C9UwqRBVk68)
+
+## File structure
 mainfile.ipynb contains the main program that should be run.
 
 argon_calculation contains the self written functions.
